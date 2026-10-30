@@ -1,6 +1,6 @@
 # Spatial efficiency
 
-Goal: every region of the screen is purposeful. This is not "fill every pixel" and not "fit it all above the fold". Tags: [E] evidence, [C] convention, [H] heuristic (see sources.md).
+Goal: every region of the screen is purposeful. This is not "fill every pixel" and not "fit it all above the fold". Tags: [V] verified against a source read on 2026-10-30, [R] recalled and unchecked, [C] convention, [H] heuristic, [M] this skill's own rule (see `sources.md`). (see sources.md).
 
 ## Think in a budget, not in cards
 
@@ -44,12 +44,22 @@ A 900px viewport minus chrome leaves ~800px: top bar + KPI band + primary row + 
 
 ## Intentional whitespace (keep this)
 
-- Gap between groups larger than gaps within groups (proximity) [E].
+- Gap between groups larger than gaps within groups (proximity) [R].
 - Breathing room around the primary KPI/chart so it reads first.
 - Line-height and cell padding enough to scan rows (table rows 32-40px).
 - Margin around chart plot areas for axis labels. Cramped labels are worse than empty space.
 
 Test: *if I removed this whitespace, would grouping or legibility suffer?* If no, it's waste. If yes, it's structure.
+
+## One screen or scrolling: Few's rule and where this skill departs
+
+Few's definition: a dashboard is "a visual display of the most important information needed to achieve one or more objectives, consolidated and arranged on a single screen so the information can be monitored at a glance" [V]. His pitfall #1 is "exceeding the boundaries of a single screen": "something critical is sacrificed when the viewer must lose sight of some data in order to scroll down or over", and splitting the picture into slices chosen by radio buttons or list boxes means "the viewer can never compare the performance of products or regions" [V]. His grounds are about monitoring and comparison, and he gives the short-term-memory argument [his claim].
+
+This skill follows it for **monitoring dashboards**: aim to fit the whole thing in one desktop screen (the finance and fitness examples do, at 1440x900 and 1920x1080). It deliberately relaxes it for **exploratory/analytical dashboards** (the analytics example is about 1.4 screens), on the project owner's instruction not to cram: a purposeful scroll to a detail table beats charts too small to read. What does not relax:
+- The first screen holds the P1 answers and the main comparison.
+- Things the reader must compare stay visible together; don't put them behind tabs, selectors or toggles.
+- Scroll is for detail that is consulted, not for comparison partners.
+- Don't stretch cards just to fill the screen: Few's #13 describes sections that "were simply stretched" to fill space as a mark of a poor dashboard [V], and our own test found over-stretched list cards read as sparse.
 
 ## Scrolling: when it's right
 

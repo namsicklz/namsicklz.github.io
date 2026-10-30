@@ -1,6 +1,6 @@
 # Dashboard patterns
 
-Starting compositions, not templates. Pick the closest, then reshape to the content. Spans are 12-column at ≥ 1100px. Tags: [H] heuristic throughout.
+Starting compositions, not templates. Pick the closest, then reshape to the content. Spans are 12-column at ≥ 1100px. Tags: [H] heuristic throughout (starting points, not findings).
 
 ## 1. Monitor / overview (glanceable)
 ```

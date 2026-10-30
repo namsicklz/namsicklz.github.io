@@ -1,11 +1,11 @@
 # Typography and spacing
 
-Defaults for a dense-but-calm data UI. Tags: [E] evidence, [C] convention, [H] heuristic. Tune to the project.
+Defaults for a dense-but-calm data UI. Tags: [V] verified against a source read on 2026-10-30, [R] recalled and unchecked, [C] convention, [H] heuristic, [M] this skill's own rule (see `sources.md`). Tune to the project.
 
 ## Type
 
 - **Family**: one UI sans (system or Inter). A second face only for a deliberate brand reason. Monospace for IDs/code, not for numbers in general.
-- **Numerals**: `font-variant-numeric: tabular-nums` everywhere there are numbers so columns and changing values align [E: alignment aids comparison].
+- **Numerals**: `font-variant-numeric: tabular-nums` everywhere there are numbers so columns and changing values align [R: alignment aids comparison].
 - **Scale (px)**: 11 micro (axis ticks only) · 12 label/secondary · 13 body (dense) · 14 base · 16 card/page title · 20 section · 26 KPI · 32 hero KPI. Avoid > 36px; a giant number wastes space and drowns the context.
 - **Weights**: 400 / 500 / 600. Max two per card.
 - **Line height**: 1.4-1.5 for text, 1.1-1.2 for big numbers. Tight line height on KPI values prevents oversized tiles.
@@ -14,9 +14,9 @@ Defaults for a dense-but-calm data UI. Tags: [E] evidence, [C] convention, [H] h
 - **Line length**: if there's prose (insights, notes), 45-80 characters.
 - **Truncation**: ellipsis only with a `title`/tooltip showing the full text. Prefer wrapping two lines for names over truncating key info.
 
-## Number formatting [E for readability, C for specifics]
+## Number formatting [R for readability, C for specifics]
 
-- Thousands separators; compact (1.2k, 3.4M) in tight spaces, full in tables/tooltips.
+- Thousands separators; compact (1.2k, 3.4M) in tight spaces, full in tables/tooltips. On a monitoring view, don't show more precision than the decision needs: "$3.8M", not "$3,848,305.93" [V: Few #3]. Express a variance directly ("-10%") rather than leaving the reader to subtract two amounts [V: Few #4].
 - Consistent decimals per column. Percent with ≤ 1 decimal; currency with cents only if small amounts matter.
 - Units: put in the label ("Revenue ($)") or one suffix, not repeated on every cell. Negative numbers: minus sign (−), optionally with color, never parentheses plus red only.
 - Dates: short and consistent ("Oct 30", "Q3 '26"). Axis shows what changes; omit repeated year/month.
@@ -42,7 +42,7 @@ Defaults for a dense-but-calm data UI. Tags: [E] evidence, [C] convention, [H] h
 
 ## Color tokens (summary)
 
-See `assets/design-tokens.json`. Text on surface must meet 4.5:1 (text-3 as small text should still be ≥ 4.5:1: choose it deliberately, not as "whatever looks light"). Borders can be low contrast (decorative) but form boundaries for inputs need ≥ 3:1.
+See `assets/design-tokens.json`. Text must meet 4.5:1 on **every** surface it sits on: `surface`, `surface-2`, `bg` and the hero tint, not just white (measured: the original `text-3` was 4.15:1 on `surface-2`; it is now ≥ 4.6:1 on all four). Hairline `--border` is decorative; the boundary of an input or button uses `--border-ctl` (≥ 3:1) [V: WCAG 1.4.11].
 
 ## Consistency checklist
 

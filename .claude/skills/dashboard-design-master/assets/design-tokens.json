@@ -19,15 +19,15 @@
   "color": {
     "light": {
       "bg": "#f5f6f8", "surface": "#ffffff", "surface-2": "#f0f2f5", "border": "#e3e6eb",
-      "text": "#14181f", "text-2": "#505a69", "text-3": "#6b7585",
-      "accent": "#2f5bea", "pos": "#12805c", "neg": "#c93b3b", "warn": "#b36b00"
+      "text": "#14181f", "text-2": "#505a69", "text-3": "#626c7a", "border-ctl": "#8791a0",
+      "accent": "#2f5bea", "pos": "#107554", "neg": "#b73636", "warn": "#9e5e00"
     },
     "dark": {
       "bg": "#0f1217", "surface": "#171b22", "surface-2": "#1e232c", "border": "#2a313c",
-      "text": "#e8ebf0", "text-2": "#a4adbb", "text-3": "#8691a3",
+      "text": "#e8ebf0", "text-2": "#a4adbb", "text-3": "#8691a3", "border-ctl": "#6b7482",
       "accent": "#6f8dff", "pos": "#3fbf94", "neg": "#ef7373", "warn": "#e0a040"
     },
-    "categorical_light": ["#2f5bea", "#e07a1f", "#12805c", "#a23bb5", "#c93b3b", "#6b7585"],
+    "categorical_light": ["#2f5bea", "#e07a1f", "#107554", "#a23bb5", "#b73636", "#626c7a"],
     "categorical_dark": ["#6f8dff", "#f0a050", "#3fbf94", "#c97bdc", "#ef7373", "#a4adbb"],
     "rules": [
       "color encodes meaning (one hue = one thing everywhere)",

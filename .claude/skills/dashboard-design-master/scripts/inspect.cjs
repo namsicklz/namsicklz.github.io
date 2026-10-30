@@ -198,12 +198,22 @@ function audit() {
   const lc = Object.entries(lowc);
   if (lc.length) add('low-contrast', 'high', `${lc.length} text styles below WCAG AA`, lc.slice(0, 5).map(([k, v]) => `${k} ${v}:1`).join(', '));
 
-  // 6. tiny interactive targets
-  const small = [...document.querySelectorAll('button, a[href], input, select, [role=button], [role=tab]')]
-    .filter((e) => visible(e) && !inScroller(e))
-    .filter((e) => { const r = e.getBoundingClientRect(); return r.width < 24 || r.height < 24; })
-    .map(sel);
-  if (small.length) add('small-target', 'low', `${small.length} controls under 24px`, [...new Set(small)].slice(0, 4).join(', '));
+  // 6. tiny interactive targets, WCAG 2.2 SC 2.5.8: >= 24x24 CSS px, or undersized with the spacing exception
+  //    (a 24px circle centred on the target must not touch another target, nor another undersized target's circle).
+  //    Not modelled: inline-in-text, equivalent-control, user-agent and essential exceptions.
+  const targets = [...document.querySelectorAll('button, a[href], input, select, [role=button], [role=tab]')]
+    .filter((e) => visible(e) && !inScroller(e)).map((e) => ({ e, r: e.getBoundingClientRect() }));
+  const small = targets.filter(({ r }) => r.width < 24 || r.height < 24).filter(({ e, r }) => {
+    const c = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    return targets.some((o) => {
+      if (o.e === e) return false;
+      const dx = Math.max(o.r.left - c.x, 0, c.x - o.r.right), dy = Math.max(o.r.top - c.y, 0, c.y - o.r.bottom);
+      if (Math.hypot(dx, dy) < 12) return true; // circle touches the other target
+      const oc = { x: o.r.left + o.r.width / 2, y: o.r.top + o.r.height / 2 };
+      return (o.r.width < 24 || o.r.height < 24) && Math.hypot(oc.x - c.x, oc.y - c.y) < 24; // two undersized circles intersect
+    });
+  }).map(({ e }) => sel(e));
+  if (small.length) add('small-target', 'low', `${small.length} undersized controls fail WCAG 2.5.8 spacing`, [...new Set(small)].slice(0, 4).join(', '));
 
   // 7. empty-looking cards
   cards.forEach((c) => {

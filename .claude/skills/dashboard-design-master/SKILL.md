@@ -24,9 +24,9 @@ Load only what the task needs:
 | Choosing or styling a chart | `references/data-visualization.md` |
 | Type, spacing, color, density questions | `references/typography-and-spacing.md`, `references/visual-hierarchy.md` |
 | Grid and responsive behaviour | `references/layout-principles.md` |
-| Contrast, keyboard, color-blindness | `references/accessibility.md` |
+| Contrast (text 4.5:1, controls and chart marks 3:1), target size, keyboard, colour-blindness | `references/accessibility.md` |
 | Design tokens / starter code | `references/design-system.md`, `assets/` |
-| Which claims are evidence vs taste | `references/sources.md` |
+| Which claims are verified vs recalled vs taste (read this before quoting a source) | `references/sources.md` |
 | What went wrong in past builds | `references/testing-log.md`, the defects list in `workflows/visual-refinement.md` |
 
 ## Layout plan (do this first)
@@ -43,7 +43,7 @@ Write down, briefly:
 ## Spatial rules that matter most
 
 - **Size to content, not to symmetry.** A KPI is ~90-110px tall, not 200. A time series gets 2-3x the width of a category breakdown. A table gets full width. Equal-size cards are a smell, not a default.
-- **Deliberate scroll beats cramming.** Put P1 and the main comparison in the first screen (about 1.0-1.6 screens total is typical), but never shrink a chart below ~240x140px to avoid scrolling.
+- **Match the dashboard's job to the screen.** A *monitoring* dashboard should fit one screen: Few defines a dashboard as information "consolidated and arranged on a single screen so the information can be monitored at a glance". An *exploratory* one may scroll (about 1.0-1.6 screens) to a detail table. Either way: P1 and the main comparison are in the first screen; things the reader must compare are never hidden behind tabs or selectors; and no chart shrinks below ~240x140px just to avoid scrolling (`references/spatial-efficiency.md`).
 - **Gaps and padding are a system.** One gap value (12px) between cards, one card padding (14-16px). No dead rows, no orphan card alone on a row, no card whose bottom third is empty.
 - **Rows align.** Cards in a row share top and height; charts stretch to fill their card (`flex:1`), they are not given a fixed height with leftover space.
 - **Whitespace is for grouping.** Space between groups > space within groups (proximity). Padding to look "airy" is waste.
@@ -67,7 +67,9 @@ Pick the chart for the question (trend: line; compare categories: sorted bars; p
 - Chart with a legend taking 30% of its card, or ≥7 colors
 - Card with large empty bottom area, or content hugging top with fixed height
 - Heavy shadows, gradients on everything, 16px+ radii, decorative icons per KPI
-- Everything the same size and weight, so no entry point
+- Everything the same size and weight, so no entry point (Few #10: "When everything is visually prominent, nothing stands out")
+- Comparison partners split across tabs/selectors so they can never be seen together (Few #1)
+- A different colour per bar when the bars are already labelled (Few #12)
 - Tables with every column left-aligned and no numeric alignment
 - Different card paddings, radii, or font sizes between sections
 - Truncated labels with no way to see the full text

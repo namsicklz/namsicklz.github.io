@@ -7,6 +7,7 @@ Defaults live in `assets/design-tokens.json` and `assets/base.css`. They are sta
 - **Radius**: card 10, control 6, pill 999.
 - **Type**: 11/12/13/14/16/20/26/32; weights 400/500/600; tabular numerals.
 - **Color**: surfaces `bg` < `surface` < `surface-2`; text `text`/`text-2`/`text-3`; one `accent`; semantic `pos`/`neg`/`warn`; 6 categorical `--c1..--c6`; `grid` for chart gridlines. Light and dark sets provided; dark uses borders instead of shadows and lifted accent hues.
+- **Control boundary**: `--border-ctl` (≥ 3:1 on surface) for inputs, selects, buttons and selected states; the hairline `--border` is decoration only. All text tokens are measured ≥ 4.5:1 on surface, surface-2, bg and the hero tint (see `accessibility.md`).
 - **Elevation**: border first, faint shadow second, popover shadow only for overlays.
 
 ## Components in base.css

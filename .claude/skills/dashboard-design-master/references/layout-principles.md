@@ -1,6 +1,6 @@
 # Layout principles
 
-Tags: [E] evidence, [C] convention, [H] heuristic.
+Tags: [V] verified against a source read on 2026-10-30, [R] recalled and unchecked, [C] convention, [H] heuristic, [M] this skill's own rule (see `sources.md`).
 
 ## Grid
 
@@ -11,7 +11,7 @@ Tags: [E] evidence, [C] convention, [H] heuristic.
 - Nested grids are fine (a card that holds a 2x2 of mini-stats); keep the same gap system, using a smaller gap (8px) inside cards.
 - Subgrid is optional and useful for aligning internals across cards; don't rely on it if the project targets older browsers.
 
-## Alignment, proximity, grouping (Gestalt) [E]
+## Alignment, proximity, grouping (Gestalt) [R]
 
 - **Proximity**: items closer together read as a group. Make inter-group space ≥ 1.5-2x intra-group space.
 - **Common region**: a card boundary says "these belong together". Don't box things that don't need grouping; a KPI strip can be unboxed with dividers.
@@ -23,7 +23,7 @@ Tags: [E] evidence, [C] convention, [H] heuristic.
 
 - Symmetric layouts feel stable but can be dull and give no entry point. Prefer **asymmetric balance**: a wide dominant element offset by a narrow stack of supporting items.
 - Visual weight comes from size, contrast, saturation, and density. A big, dark chart on the left is balanced by 2-3 smaller light items on the right.
-- Place the highest-priority item where the eye begins (top-left in LTR, then across) [C]. Don't depend on a strict "F-pattern".
+- Place the highest-priority item where the eye begins (top-left in LTR, then across) [C]. Few agrees the most prominent position should not be wasted on a logo or navigation (pitfall #9 [V], an opinion about one example); an "F-pattern" was not verified, so don't depend on it.
 
 ## Reading order
 
@@ -52,7 +52,7 @@ Rules: no horizontal page scroll ever; tables scroll within their container; fil
 | Group of related facts, one chart | Card | Card around every single number |
 | 3-6 key numbers | KPI strip (tiles) | Giant cards |
 | Switch dimension/period of the same view | Segmented control, tabs | Duplicating charts |
-| Several equally important views, user picks one | Tabs | Stacking all, forcing scroll |
+| Several equally important views, user picks one | Tabs, **only if the views are not compared with each other** | Hiding comparison partners behind tabs or selectors (Few pitfall #1 [V]) |
 | Optional detail, long lists | Expandable row, drawer, "view all" | Always-visible dump |
 | Compare many items precisely | Table (with inline bars/sparklines) | Chart with 30 labels |
 | Few global filters | Toolbar | Sidebar |

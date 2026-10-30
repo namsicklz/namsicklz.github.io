@@ -2,10 +2,11 @@
    Cards are `.card`; charts live in `.chart` hosts (see charts.js) so scripts/inspect.cjs can audit them. */
 :root {
   --bg:#f5f6f8; --surface:#fff; --surface-2:#f0f2f5; --border:#e3e6eb;
-  --text:#14181f; --text-2:#505a69; --text-3:#6b7585;
+  --text:#14181f; --text-2:#505a69; --text-3:#626c7a;
   --accent:#2f5bea; --accent-soft:rgba(47,91,234,.10);
-  --pos:#12805c; --neg:#c93b3b; --warn:#b36b00;
-  --c1:#2f5bea; --c2:#e07a1f; --c3:#12805c; --c4:#a23bb5; --c5:#c93b3b; --c6:#6b7585;
+  --pos:#107554; --neg:#b73636; --warn:#9e5e00;
+  --c1:#2f5bea; --c2:#e07a1f; --c3:#107554; --c4:#a23bb5; --c5:#b73636; --c6:#626c7a;
+  --border-ctl:#8791a0; /* >=3:1 on surface: boundaries that identify inputs and buttons (WCAG 1.4.11) */
   --grid:#e9ecf0; --shadow:0 1px 2px rgba(16,24,40,.05);
   --gap:12px; --pad:16px; --r:10px; --r-ctl:6px;
   --font:ui-sans-serif,Inter,"Segoe UI",system-ui,-apple-system,sans-serif;
@@ -16,14 +17,14 @@
   --accent:#6f8dff; --accent-soft:rgba(111,141,255,.16);
   --pos:#3fbf94; --neg:#ef7373; --warn:#e0a040;
   --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#c97bdc; --c5:#ef7373; --c6:#a4adbb;
-  --grid:#242a34; --shadow:none;}}
+  --border-ctl:#6b7482; --grid:#242a34; --shadow:none;}}
 :root[data-theme=dark]{
   --bg:#0f1217; --surface:#171b22; --surface-2:#1e232c; --border:#2a313c;
   --text:#e8ebf0; --text-2:#a4adbb; --text-3:#8691a3;
   --accent:#6f8dff; --accent-soft:rgba(111,141,255,.16);
   --pos:#3fbf94; --neg:#ef7373; --warn:#e0a040;
   --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#c97bdc; --c5:#ef7373; --c6:#a4adbb;
-  --grid:#242a34; --shadow:none;}
+  --border-ctl:#6b7482; --grid:#242a34; --shadow:none;}
 
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -48,7 +49,7 @@ button,input,select{font:inherit;color:inherit}
 .kpis{display:grid;grid-template-columns:1.35fr;grid-auto-columns:1fr;grid-auto-flow:column;gap:var(--gap)} /* any tile count: first tile is the wide one */
 .kpis>*{min-width:0}
 @media (max-width:1099px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row}.kpis>:first-child{grid-column:1/-1}.kpis>:last-child:nth-child(even){grid-column:1/-1}} /* hero spans; with it full-width, an even count leaves one tile over, so the last spans too */
-.card.hero{background:linear-gradient(0deg,var(--accent-soft),var(--accent-soft)),var(--surface)}
+.card.hero{background-color:color-mix(in srgb,var(--accent) 10%,var(--surface))} /* solid colour, so contrast tools can measure text on it */
 
 /* ---- fit: on desktop, let the chart rows grow into a tall viewport instead of leaving a blank band.
    Use on .page (flex column) with a .grid.fill child; min-heights on the rows keep it readable on short screens. ---- */
@@ -83,9 +84,9 @@ button,input,select{font:inherit;color:inherit}
 /* ---- controls ---- */
 .seg{display:inline-flex;background:var(--surface-2);border-radius:var(--r-ctl);padding:2px}
 .seg button{border:0;background:none;padding:4px 10px;min-height:26px;border-radius:4px;color:var(--text-2);cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(16,24,40,.12)}
-.btn,.select,.input{height:30px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r-ctl);background:var(--surface);cursor:pointer}
-.btn:hover,.select:hover{border-color:var(--text-3)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 0 0 1px var(--border-ctl)} /* selected state: weight + 3:1 ring, not tint alone */
+.btn,.select,.input{height:30px;padding:0 10px;border:1px solid var(--border-ctl);border-radius:var(--r-ctl);background:var(--surface);cursor:pointer}
+.btn:hover,.select:hover{border-color:var(--text-2)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .chip{display:inline-flex;white-space:nowrap;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;background:var(--surface-2);color:var(--text-2);font-size:12px}

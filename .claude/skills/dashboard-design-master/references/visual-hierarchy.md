@@ -1,15 +1,17 @@
 # Visual hierarchy
 
-Goal: the reader knows within two seconds what matters most, what supports it, and where detail lives. Tags: [E] evidence, [C] convention, [H] heuristic.
+Goal: the reader knows within two seconds what matters most, what supports it, and where detail lives. Tags: [V] verified in a source read 2026-10-30, [R] recalled, [C] convention, [H] heuristic (see `sources.md`).
+
+Two sourced anchors: Few, pitfall #10: "When everything is visually prominent, nothing stands out" [V]. Nielsen heuristic 8, Aesthetic and Minimalist Design: "Every extra unit of information in an interface competes with the relevant units of information and diminishes their relative visibility" [V].
 
 ## Channels that carry rank
 
-Ordered roughly by strength; combine two or three, not all [E: Ware, Munzner]:
+Ordered roughly by strength; combine two or three, not all [R: Ware, Munzner]:
 
 1. **Size**: bigger = more important. Largest number or chart is the focal point.
 2. **Position**: top-left first, then rightwards/downwards (LTR) [C].
 3. **Contrast/weight**: dark, heavy, saturated reads first; muted recedes.
-4. **Color**: a single accent hue on the focal item; everything else neutral. Preattentive "pop-out" works only when few items share the distinguishing color [E].
+4. **Color**: a single accent hue on the focal item; everything else neutral. Preattentive "pop-out" works only when few items share the distinguishing color [R].
 5. **Whitespace/isolation**: space around something elevates it.
 6. **Containment**: a card or tinted band marks a primary region.
 

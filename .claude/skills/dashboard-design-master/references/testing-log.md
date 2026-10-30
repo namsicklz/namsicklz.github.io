@@ -34,3 +34,21 @@ node .claude/skills/dashboard-design-master/scripts/inspect.cjs .claude/skills/d
 - Inspector checks are heuristic: `dead-space-in-card` can false-positive on intentionally tall cards; contrast ignores gradients/images.
 - Dark mode was designed (tokens) but not screenshot-reviewed in these tests.
 - Light touch/hover behaviour was only smoke-tested (filters, sort, reset) for analytics.
+
+## Verification pass (2026-10-30)
+
+After the first build, network access to nngroup.com, w3.org and perceptualedge.com was allowed and the claims in the reference files were checked against: Nielsen's ten heuristics page; WCAG 2.2 Understanding pages for SC 1.4.3, 1.4.11, 2.5.8, 1.4.1; and Few's 2006 *Common Pitfalls in Dashboard Design* white paper. Details of what matched and what was corrected are in `sources.md`. The checks that changed the skill itself:
+
+| Finding | Evidence | Change |
+|---|---|---|
+| Our own text token failed AA on non-white surfaces | measured: `text-3` 4.15:1 on `surface-2`, 4.05:1 on hero tint; `warn` text 4.18:1 | tokens darkened (`text-3` #626c7a, `warn` #9e5e00, `pos`, `neg`), re-measured ≥ 4.5 on surface/surface-2/bg/tint |
+| Control borders 1.25:1 vs the 3:1 WCAG 1.4.11 asks for boundaries that identify controls | measured | new `--border-ctl` token for inputs, selects, buttons; selected segment gets weight + 3:1 ring |
+| Hero tint was a gradient layer, so the inspector measured text against white | inspector blind spot | hero now a solid `color-mix` colour; contrast tool sees it |
+| Gridline claim unsupported | WCAG 1.4.11 chart example counts value lines as graphical objects | `accessibility.md`: light gridlines only if values are readable another way |
+| Target-size check ignored the spacing exception | WCAG 2.5.8 | inspector implements size + spacing exception; unit-tested (touching 20px pair flagged, 4px-gapped pair and lone 16px pass) |
+| Skill cited Few for "at a glance" but omitted his single-screen rule | Few's definition and pitfall #1 | `SKILL.md` and `spatial-efficiency.md` state the rule, where this skill departs (exploratory dashboards), and the guardrail it keeps (don't fragment comparisons) |
+| Misattributions | Few's paper has no bullet graphs, sparklines or dual-axis rule | re-tagged [R]/[M] in `data-visualization.md` |
+
+Few's paper independently supports three lessons the render loop found: colour with no meaning (#12), stretched sections to fill space (#13), and everything equally prominent (#10).
+
+**Still unverified:** Tufte, Ware, Munzner, Cleveland & McGill, Bertin, Sweller, Brewer, Wilke, Wathan & Schoger, Few's book, SC 1.4.10 and 2.5.5. They are books or pages not fetched; their claims are tagged [R].
