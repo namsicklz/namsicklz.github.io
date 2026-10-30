@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finances</title>
+<link rel="stylesheet" href="../base.css">
+<style>
+  .cat-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:8px}
+  .budget{display:grid;gap:12px}
+  .budget .row{display:grid;gap:4px}
+  .budget .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2)}
+  .budget .meta b{color:var(--text);font-weight:500}
+  .tx td:first-child{color:var(--text-2)}
+  .movers{margin-top:auto;padding-top:10px;border-top:1px solid var(--border)}
+  .movers h3{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:4px}
+  .movers .row{display:flex;justify-content:space-between;padding:4px 0}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1>Finances</h1>
+  <span class="chip" id="range-label"></span>
+  <div class="seg" role="group" aria-label="Range" id="range">
+    <button aria-pressed="false" data-n="3">3M</button>
+    <button aria-pressed="false" data-n="6">6M</button>
+    <button aria-pressed="true" data-n="12">12M</button>
+  </div>
+</header>
+
+<main class="page fit">
+  <section class="kpis" aria-label="Key figures" id="kpis"></section>
+
+  <section class="grid fill">
+    <article class="card s8">
+      <div class="card-head"><h2>Income vs expenses</h2><span class="sub">monthly</span>
+        <div class="right legend"><span><i style="background:var(--c1);height:3px;margin-bottom:2px"></i>Income</span><span><i style="background:var(--c2)"></i>Expenses</span></div></div>
+      <div class="card-body"><div class="chart" id="c-trend" role="img" aria-label="Monthly income and expenses"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Spending by category</h2><span class="sub" id="cat-sub"></span></div>
+      <div class="card-body"><div class="chart" id="c-cat" role="img" aria-label="Spending by category" style="flex:none;height:216px;min-height:0"></div>
+        <div class="movers"><h3>Biggest changes vs Sep</h3><div id="movers"></div></div></div>
+    </article>
+
+    <article class="card s4">
+      <div class="card-head"><h2>Savings balance</h2><span class="sub">cumulative</span></div>
+      <div class="card-body"><div class="chart" id="c-save" role="img" aria-label="Cumulative savings"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Budgets this month</h2><span class="sub" id="bud-sub"></span></div>
+      <div class="card-body budget" id="budgets"></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Largest recent transactions</h2></div>
+      <div class="table-wrap"><table class="tx"><thead><tr><th>Date</th><th>Merchant</th><th class="num">Amount</th></tr></thead><tbody id="tx"></tbody></table></div>
+    </article>
+  </section>
+</main>
+
+<script src="../charts.js"></script>
+<script>
+// ---- sample data (clearly synthetic) ----
+const months=['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+const income=[5400,5400,5600,5400,5400,5900,5400,5400,5400,5600,5400,5400];
+const exp={Housing:[1650,1650,1650,1650,1650,1650,1650,1650,1650,1650,1650,1650],
+  Groceries:[520,610,540,500,530,520,560,540,580,520,540,560],
+  Dining:[260,340,280,240,300,320,290,310,360,280,300,340],
+  Transport:[210,190,230,200,220,240,210,260,230,210,200,220],
+  Shopping:[300,720,260,220,310,280,340,290,330,380,260,310],
+  Other:[380,420,360,340,390,410,370,400,420,380,350,400]};
+const cats=Object.keys(exp), total=m=>cats.reduce((a,c)=>a+exp[c][m],0);
+const expenses=months.map((_,i)=>total(i));
+const net=months.map((_,i)=>income[i]-expenses[i]);
+const k=v=>v===0?'$0':'$'+(Math.round(v/100)/10)+'k';
+const $=(s)=>document.querySelector(s), money=v=>'$'+Math.round(v).toLocaleString('en-US');
+const sum=a=>a.reduce((x,y)=>x+y,0), last=a=>a[a.length-1], prev=a=>a[a.length-2];
+const pct=(a,b)=>((a-b)/b*100);
+
+function delta(cur,old,goodUp=true,pts=false){const p=pts?cur-old:pct(cur,old),up=p>=0,good=up===goodUp,u=pts?' pts':'%';
+  if(Math.abs(p)<0.05) return `<span class="delta" style="color:var(--text-2)">– 0${u}</span>`;
+  return `<span class="delta ${good?'pos':'neg'}">${up?'▲':'▼'} ${Math.abs(p).toFixed(1)}${u}</span>`}
+function kpi(label,value,d,spark,hero,color){return `<article class="card ${hero?'hero':''}"><div class="kpi ${hero?'hero':''}">
+  <span class="label">${label}</span>
+  <div class="kpi-row"><span class="value">${value}</span><div class="chart spark" data-spark='${JSON.stringify(spark)}' data-color="${color}"></div></div>
+  <div class="foot">${d}<span>vs last month</span></div></div></article>`}
+
+function render(n){
+  const sl=a=>a.slice(-n), M=sl(months);
+  $('#range-label').textContent=M[0]+' – '+last(M);
+  const rate=net.map((v,i)=>v/income[i]*100);
+  $('#kpis').innerHTML=
+    kpi('Net savings',money(last(net)),delta(last(net),prev(net)),sl(net),true,'var(--c3)')+
+    kpi('Income',money(last(income)),delta(last(income),prev(income)),sl(income),false,'var(--c1)')+
+    kpi('Expenses',money(last(expenses)),delta(last(expenses),prev(expenses),false),sl(expenses),false,'var(--c2)')+
+    kpi('Savings rate',last(rate).toFixed(1)+'%',delta(last(rate),prev(rate),true,true),sl(rate),false,'var(--c3)');
+  document.querySelectorAll('[data-spark]').forEach(h=>Chart.spark(h,{values:JSON.parse(h.dataset.spark),color:h.dataset.color,area:true}));
+
+  Chart.bars($('#c-trend'),{x:M,series:[{name:'Expenses',values:sl(expenses),color:'var(--c2)'}],overlay:{name:'Income',values:sl(income),color:'var(--c1)'},fmt:k});
+
+  const catTot=cats.map((c,i)=>({label:c,value:sum(sl(exp[c])),color:'var(--c1)'})).sort((a,b)=>b.value-a.value);
+  $('#cat-sub').textContent=money(sum(catTot.map(d=>d.value)))+' total';
+  Chart.hbars($('#c-cat'),{items:catTot,fmt:money});
+  $('#movers').innerHTML=cats.map(c=>({c,d:last(exp[c])-prev(exp[c])})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3)
+    .map(({c,d})=>`<div class="row"><span>${c}</span><span class="delta ${d>0?'neg':'pos'}">${d>0?'▲':'▼'} ${money(Math.abs(d))}</span></div>`).join('');
+
+  let acc=0; const bal=net.map(v=>acc+=v);
+  Chart.line($('#c-save'),{x:M,series:[{name:'Balance',values:sl(bal),color:'var(--c3)'}],area:true,fmt:k});
+}
+document.querySelectorAll('#range button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#range button').forEach(x=>x.setAttribute('aria-pressed',x===b));render(+b.dataset.n)});
+render(12);
+
+// budgets (this month)
+const budgets={Housing:1650,Groceries:600,Dining:300,Transport:250,Shopping:300};
+$('#bud-sub').textContent='Oct';
+$('#budgets').innerHTML=Object.entries(budgets).map(([c,b])=>{const s=last(exp[c]),p=s/b*100,cls=p>100?'over':p>85?'warn':'';
+  return `<div class="row"><div class="meta"><span>${c}</span><span><b>${money(s)}</b> of ${money(b)}${p>100?' · over by '+money(s-b):''}</span></div><div class="bar" role="progressbar" aria-valuenow="${Math.round(p)}" aria-valuemin="0" aria-valuemax="100"><span class="${cls}" style="width:${Math.min(100,p)}%"></span></div></div>`}).join('');
+
+$('#tx').innerHTML=[['Oct 28','Delta Air Lines',-486.2],['Oct 22','Apple Store',-329.0],['Oct 19','Electric & Gas',-142.8],['Oct 15','Whole Foods',-128.4],['Oct 03','Rent',-1650],['Oct 01','Payroll',2700]]
+  .map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num" style="color:${r[2]>0?'var(--pos)':'inherit'}">${r[2]>0?'+':'−'}${money(Math.abs(r[2]))}</td></tr>`).join('');
+</script>
+</body>
+</html>

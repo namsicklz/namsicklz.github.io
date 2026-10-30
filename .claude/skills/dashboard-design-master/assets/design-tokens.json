@@ -1,0 +1,40 @@
+{
+  "_note": "Defaults, not rules. Adapt hue/density to the project; keep the relationships (contrast steps, 4px spacing, one accent).",
+  "space": { "1": 4, "2": 8, "3": 12, "4": 16, "5": 24, "6": 32 },
+  "radius": { "control": 6, "card": 10, "pill": 999 },
+  "type": {
+    "family": "ui-sans-serif, Inter, 'Segoe UI', system-ui, -apple-system, sans-serif",
+    "scale_px": { "micro": 11, "label": 12, "body": 13, "base": 14, "title": 16, "section": 20, "kpi_secondary": 22, "kpi_hero": 32 },
+    "weights": { "regular": 400, "medium": 500, "semibold": 600 },
+    "rules": ["tabular-nums on every number", "labels 12px uppercase-free, text-2 color", "max 2 weights per card"]
+  },
+  "layout": {
+    "columns": 12,
+    "gap_px": 12,
+    "page_padding_px": 16,
+    "card_padding_px": [14, 16],
+    "header_height_px": 52,
+    "breakpoints_px": { "wide": 1600, "desktop": 1100, "tablet": 700 }
+  },
+  "color": {
+    "light": {
+      "bg": "#f5f6f8", "surface": "#ffffff", "surface-2": "#f0f2f5", "border": "#e3e6eb",
+      "text": "#14181f", "text-2": "#505a69", "text-3": "#6b7585",
+      "accent": "#2f5bea", "pos": "#12805c", "neg": "#c93b3b", "warn": "#b36b00"
+    },
+    "dark": {
+      "bg": "#0f1217", "surface": "#171b22", "surface-2": "#1e232c", "border": "#2a313c",
+      "text": "#e8ebf0", "text-2": "#a4adbb", "text-3": "#8691a3",
+      "accent": "#6f8dff", "pos": "#3fbf94", "neg": "#ef7373", "warn": "#e0a040"
+    },
+    "categorical_light": ["#2f5bea", "#e07a1f", "#12805c", "#a23bb5", "#c93b3b", "#6b7585"],
+    "categorical_dark": ["#6f8dff", "#f0a050", "#3fbf94", "#c97bdc", "#ef7373", "#a4adbb"],
+    "rules": [
+      "color encodes meaning (one hue = one thing everywhere)",
+      "green/red only for good/bad, and never as the sole signal (add arrow or sign)",
+      "max 5-6 categorical hues; beyond that, group or use small multiples",
+      "sequential scales: one hue, vary lightness"
+    ]
+  },
+  "shadow": { "card": "0 1px 2px rgba(16,24,40,.05)", "popover": "0 8px 24px rgba(16,24,40,.14)" }
+}

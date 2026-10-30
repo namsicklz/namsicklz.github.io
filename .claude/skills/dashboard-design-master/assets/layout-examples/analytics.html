@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acquisition analytics</title>
+<link rel="stylesheet" href="../base.css">
+<style>
+  .toolbar-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .toolbar-row .grow{margin-left:auto}
+  .input{width:200px}
+  .seg.devices button{padding:4px 10px}
+  /* KPI strip: one card, dividers instead of six boxes */
+  .strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:0}
+  .strip .stat{padding:12px 16px;border-left:1px solid var(--border);min-width:0}
+  .strip .stat:first-child{border-left:0}
+  .strip .label{font-size:12px;color:var(--text-2)}
+  .strip .value{font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+  .strip .foot{font-size:12px;color:var(--text-3);display:flex;gap:6px}
+  .strip .stat.primary .value{font-size:28px}
+  @media (max-width:1099px){.strip{grid-template-columns:repeat(3,minmax(0,1fr))}.strip .stat:nth-child(4){border-left:0}.strip .stat:nth-child(n+4){border-top:1px solid var(--border)}}
+  @media (max-width:699px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}.strip .stat:nth-child(odd){border-left:0}.strip .stat:nth-child(n+3){border-top:1px solid var(--border)}.strip .stat:nth-child(4){border-left:1px solid var(--border)}}
+  /* row heights are explicit: the table is the destination, so charts must not grow */
+  @media (min-width:1100px){.rows{grid-template-rows:340px 280px 400px}} /* chart rows fixed; table card is 400px at every width and scrolls inside */
+  th[data-k]{cursor:pointer;user-select:none}
+  th[data-k]:hover{color:var(--text)}
+  th .arr{display:inline-block;width:10px;color:var(--text-3)}
+  .cell-bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+  .cell-bar>span:last-child{min-width:52px;text-align:right}
+  .cell-bar .track{width:64px;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+  .cell-bar .track span{display:block;height:100%;background:var(--c1);opacity:.75}
+  .ell{display:block;max-width:280px;overflow:hidden;text-overflow:ellipsis} /* ellipsis on a wrapper: overflow on a <td> breaks row alignment */
+  .card.tablecard{height:400px}
+  .foot-note{color:var(--text-3);font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1>Acquisition analytics</h1>
+  <span class="chip">Updated 5 min ago</span>
+  <button class="btn" id="export">Export CSV</button>
+</header>
+
+<main class="page">
+  <div class="toolbar-row" role="group" aria-label="Filters">
+    <div class="seg" id="range"><button aria-pressed="false" data-d="7">7D</button><button aria-pressed="true" data-d="30">30D</button><button aria-pressed="false" data-d="90">90D</button></div>
+    <select class="select" id="channel" aria-label="Channel"><option value="">All channels</option></select>
+    <select class="select" id="region" aria-label="Region"><option value="">All regions</option></select>
+    <div class="seg devices" id="device" aria-label="Device"><button aria-pressed="true" data-v="all">All devices</button><button aria-pressed="false" data-v="0">Desktop</button><button aria-pressed="false" data-v="1">Mobile</button><button aria-pressed="false" data-v="2">Tablet</button></div>
+    <button class="btn grow" id="reset">Reset</button>
+  </div>
+
+  <section class="card strip" id="strip" aria-label="Key metrics"></section>
+
+  <section class="grid rows">
+    <article class="card s8">
+      <div class="card-head"><h2>Sessions</h2><span class="sub" id="trend-sub"></span>
+        <div class="right legend"><span><i style="background:var(--c1);height:3px;margin-bottom:2px"></i>This period</span><span><i style="background:var(--text-3);height:2px;margin-bottom:2px"></i>Prior period</span></div></div>
+      <div class="card-body"><div class="chart" id="c-trend" role="img" aria-label="Daily sessions versus prior period"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Channel mix</h2><span class="sub">sessions</span></div>
+      <div class="card-body"><div class="chart" id="c-chan" role="img" aria-label="Sessions by channel"></div></div>
+    </article>
+
+    <article class="card s4">
+      <div class="card-head"><h2>Conversion funnel</h2><span class="sub">step rate in label</span></div>
+      <div class="card-body"><div class="chart" id="c-funnel" role="img" aria-label="Conversion funnel"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Traffic by weekday and hour</h2></div>
+      <div class="card-body"><div class="chart" id="c-heat" role="img" aria-label="Sessions by weekday and hour"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Order value distribution</h2><span class="sub" id="aov-sub"></span></div>
+      <div class="card-body"><div class="chart" id="c-hist" role="img" aria-label="Distribution of order values"></div></div>
+    </article>
+
+    <article class="card s12 tablecard">
+      <div class="card-head"><h2>Landing pages by channel</h2><span class="sub" id="tbl-sub"></span>
+        <div class="right"><input class="input" id="q" type="search" placeholder="Search pages" aria-label="Search pages"></div></div>
+      <div class="table-wrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
+    </article>
+  </section>
+</main>
+
+<script src="../charts.js"></script>
+<script>
+// ---------- synthetic data ----------
+let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const $=s=>document.querySelector(s), sum=a=>a.reduce((x,y)=>x+y,0);
+const channels=['Organic search','Paid search','Direct','Email','Social','Referral'], regions=['North America','Europe','Asia-Pacific','Latin America'];
+const slugs=['/','/pricing','/features','/blog/launch-notes','/blog/ab-testing-guide','/docs/getting-started','/docs/api','/signup','/compare/alternatives','/customers','/integrations','/webinar/q4-roadmap','/blog/pricing-psychology','/templates','/security','/changelog','/careers','/blog/onboarding-checklist','/enterprise','/contact'];
+const pages=[]; slugs.forEach((p,i)=>{for(let k=0;k<2;k++){const ch=channels[(i+k*2+Math.floor(rnd()*2))%6],rg=regions[Math.floor(rnd()*4)];
+  const m=[.45+rnd()*.25,0,0]; m[1]=.9-m[0]-.05; m[2]=1-m[0]-m[1];
+  pages.push({page:p,channel:ch,region:rg,sessions:Math.round(800+Math.pow(rnd(),2.2)*14000),conv:.01+rnd()*.05*(p==='/pricing'||p==='/signup'?1.8:1),aov:48+rnd()*110,bounce:.28+rnd()*.38,mix:m,growth:(rnd()-.4)*.5})}});
+const state={d:30,channel:'',region:'',device:'all',q:'',sort:'sessions',dir:-1};
+const fmtN=v=>Math.round(v).toLocaleString('en-US'), money=v=>'$'+Math.round(v).toLocaleString('en-US'), p1=v=>(v*100).toFixed(1)+'%';
+const compact=v=>{const a=Math.abs(v);return a>=1e6?(v/1e6).toFixed(1).replace(/\.0$/,'')+'M':a>=1e3?(v/1e3).toFixed(a>=1e4?0:1).replace(/\.0$/,'')+'k':String(Math.round(v))}
+
+function rows(ignoreChannel){
+  const scale=state.d/30;
+  return pages.filter(r=>(ignoreChannel||!state.channel||r.channel===state.channel)&&(!state.region||r.region===state.region)).map(r=>{
+    const share=state.device==='all'?1:r.mix[+state.device];
+    const s=r.sessions*scale*share; const conv=r.conv*(state.device==='1'?.7:state.device==='2'?.85:1);
+    return {...r,s,orders:s*conv,rev:s*conv*r.aov,conv};
+  });
+}
+const sumBy=(R,f)=>R.reduce((a,r)=>a+f(r),0);
+function render(){
+  const R=rows(false), S=sumBy(R,r=>r.s), O=sumBy(R,r=>r.orders), REV=sumBy(R,r=>r.rev), B=S?sumBy(R,r=>r.s*r.bounce)/S:0, U=S*.62;
+  const g=(v,gr)=>`<span class="delta ${gr>=0?'pos':'neg'}">${gr>=0?'▲':'▼'} ${Math.abs(gr*100).toFixed(1)}%</span>`;
+  const bg=(v,gr)=>`<span class="delta ${gr<=0?'pos':'neg'}">${gr>=0?'▲':'▼'} ${Math.abs(gr*100).toFixed(1)}%</span>`;
+  const gr={s:.082,u:.061,c:.034,r:.117,a:.036,b:-.021};
+  const stat=(l,v,d,cls='')=>`<div class="stat ${cls}"><div class="label">${l}</div><div class="value">${v}</div><div class="foot">${d}<span>vs prior</span></div></div>`;
+  $('#strip').innerHTML=stat('Sessions',compact(S),g(S,gr.s),'primary')+stat('Users',compact(U),g(U,gr.u))+stat('Conv. rate',S?p1(O/S):'–',g(0,gr.c))+stat('Revenue','$'+compact(REV),g(REV,gr.r))+stat('Avg. order',O?money(REV/O):'–',g(0,gr.a))+stat('Bounce rate',p1(B),bg(0,gr.b));
+
+  // trend: daily sessions with weekly seasonality, prior period dashed
+  const n=state.d, days=Array.from({length:n},(_,i)=>i), dow=i=>[.78,1.05,1.12,1.1,1.04,.9,.72][i%7];
+  const wsum=sum(days.map(dow)), cur=days.map(i=>S*dow(i)/wsum*(1+(i/n-.5)*.12)), pri=cur.map((v,i)=>v/(1+gr.s)*(1+Math.sin(i*1.7)*.04));
+  const lab=days.map(i=>{const d=new Date(2026,9,30-(n-1-i));return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  $('#trend-sub').textContent=lab[0]+' – '+lab[n-1];
+  Chart.line($('#c-trend'),{x:lab,series:[{name:'This period',values:cur,color:'var(--c1)',area:true},{name:'Prior',values:pri,color:'var(--text-3)',dash:true}],area:true,fmt:compact});
+
+  // channel mix: selected channel in accent, others neutral
+  const R2=rows(true), byCh=channels.map(c=>({label:c,value:sumBy(R2.filter(r=>r.channel===c),r=>r.s),color:(!state.channel||state.channel===c)?'var(--c1)':'var(--border)'})).sort((a,b)=>b.value-a.value);
+  Chart.hbars($('#c-chan'),{items:byCh,fmt:compact});
+
+  // funnel
+  const steps=[['Sessions',S],['Viewed product',S*.58],['Added to cart',S*.58*.21],['Checkout',S*.58*.21*.55],['Purchased',O]];
+  Chart.hbars($('#c-funnel'),{items:steps.map(([l,v],i)=>({label:i?`${l} · ${(v/steps[i-1][1]*100).toFixed(0)}%`:l,value:v,color:i===4?'var(--c3)':'var(--c1)'})),fmt:compact,maxPitch:44});
+
+  // heatmap
+  const dowW=[1.05,1.12,1.1,1.04,.92,.62,.55], hrW=h=>Math.max(.05,Math.exp(-Math.pow((h-14)/5.2,2))*.9+Math.exp(-Math.pow((h-21)/2.2,2))*.4);
+  const heat=dowW.map((d,i)=>Array.from({length:24},(_,h)=>Math.round(S/30*d*hrW(h)/3.1)));
+  Chart.heat($('#c-heat'),{values:heat,rowLabels:['Mon','','Wed','','Fri','','Sun'],colLabels:Array.from({length:24},(_,h)=>h%6===0?String(h).padStart(2,'0'):''),aspect:2.6,fmt:v=>fmtN(v)+' sessions'});
+
+  // histogram of order values
+  const bins=['<20','20','40','60','80','100','120','150','200','300+'],wts=[.04,.13,.21,.19,.14,.09,.08,.07,.04,.01];
+  $('#aov-sub').textContent='bins start at $, median '+money(O?REV/O*.82:0);
+  Chart.bars($('#c-hist'),{x:bins,series:[{name:'Orders',values:wts.map(w=>O*w),color:'var(--c1)'}],fmt:compact});
+
+  table();
+}
+function table(){
+  const cols=[['page','Page','',r=>r.page],['channel','Channel','',r=>r.channel],['s','Sessions','num',null],['conv','Conv. rate','num',r=>p1(r.conv)],['rev','Revenue','num',r=>money(r.rev)],['bounce','Bounce','num',r=>p1(r.bounce)],['growth','vs prior','num',null]];
+  const key=state.sort;
+  let R=rows(false).filter(r=>!state.q||r.page.toLowerCase().includes(state.q.toLowerCase()));
+  R.sort((a,b)=>(typeof a[key]==='string'?a[key].localeCompare(b[key]):a[key]-b[key])*state.dir);
+  const mx=Math.max(1,...R.map(r=>r.s));
+  $('#thead').innerHTML=cols.map(([k,l,c])=>`<th data-k="${k}" class="${c}" aria-sort="${state.sort===k?(state.dir>0?'ascending':'descending'):'none'}">${l}<span class="arr">${state.sort===k?(state.dir>0?'↑':'↓'):''}</span></th>`).join('');
+  $('#tbody').innerHTML=R.map(r=>`<tr><td><span class="ell" title="${r.page}">${r.page}</span></td><td>${r.channel}</td>
+    <td class="num"><span class="cell-bar"><span class="track"><span style="width:${r.s/mx*100}%"></span></span><span>${fmtN(r.s)}</span></span></td>
+    <td class="num">${p1(r.conv)}</td><td class="num">${money(r.rev)}</td><td class="num">${p1(r.bounce)}</td>
+    <td class="num"><span class="delta ${r.growth>=0?'pos':'neg'}">${r.growth>=0?'▲':'▼'} ${Math.abs(r.growth*100).toFixed(0)}%</span></td></tr>`).join('')
+    ||`<tr><td colspan="7"><div class="empty">No pages match these filters.</div></td></tr>`;
+  $('#tbl-sub').textContent=R.length+' pages';
+  document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;state.dir=state.sort===k?-state.dir:(k==='page'||k==='channel'?1:-1);state.sort=k;table()});
+}
+// controls
+channels.forEach(c=>$('#channel').add(new Option(c,c))); regions.forEach(c=>$('#region').add(new Option(c,c)));
+const seg=(id,fn)=>document.querySelectorAll(id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll(id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b);render()});
+seg('#range',b=>state.d=+b.dataset.d); seg('#device',b=>state.device=b.dataset.v);
+$('#channel').onchange=e=>{state.channel=e.target.value;render()}; $('#region').onchange=e=>{state.region=e.target.value;render()};
+$('#q').oninput=e=>{state.q=e.target.value;table()};
+$('#reset').onclick=()=>{Object.assign(state,{d:30,channel:'',region:'',device:'all',q:''});$('#channel').value='';$('#region').value='';$('#q').value='';
+  document.querySelectorAll('#range button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.d==='30'));document.querySelectorAll('#device button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v==='all'));render()};
+render();
+</script>
+</body>
+</html>

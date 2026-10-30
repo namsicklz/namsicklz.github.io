@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Training</title>
+<link rel="stylesheet" href="../base.css">
+<style>
+  .hero-goal{margin-top:8px;display:grid;gap:4px}
+  .hero-goal .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2)}
+  .goals{display:grid;gap:14px;align-content:space-between}
+  .goal .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .goal .top b{font-weight:600}
+  .goal .top span{font-size:12px;color:var(--text-2)}
+  .goal .bar{height:8px}
+  .goal .note{font-size:12px;color:var(--text-3);margin-top:4px}
+  .wk td:nth-child(1){color:var(--text-2)}
+  .type{display:inline-flex;align-items:center;gap:6px}
+  .type i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .scale{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3);margin-top:8px}
+  .scale span{width:12px;height:12px;border-radius:3px;background:var(--c1)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1>Training</h1>
+  <span class="chip" id="range-label"></span>
+  <div class="seg" role="group" aria-label="Range" id="range">
+    <button aria-pressed="false" data-w="4">4W</button>
+    <button aria-pressed="false" data-w="8">8W</button>
+    <button aria-pressed="true" data-w="12">12W</button>
+  </div>
+</header>
+
+<main class="page fit">
+  <section class="kpis" aria-label="This week" id="kpis"></section>
+
+  <section class="grid fill">
+    <article class="card s7">
+      <div class="card-head"><h2>Weekly training volume</h2><span class="sub">hours by activity</span>
+        <div class="right legend" id="vol-legend"></div></div>
+      <div class="card-body"><div class="chart" id="c-vol" role="img" aria-label="Weekly training hours by activity"></div></div>
+    </article>
+    <article class="card s5">
+      <div class="card-head"><h2>Monthly goals</h2><span class="sub">October · 1 day left</span></div>
+      <div class="card-body goals" id="goals"></div>
+    </article>
+
+    <article class="card s4">
+      <div class="card-head"><h2>Consistency</h2><span class="sub" id="heat-sub"></span></div>
+      <div class="card-body"><div class="chart" id="c-heat" role="img" aria-label="Daily active minutes over recent weeks"></div>
+        <div class="scale">Less <span style="opacity:.25"></span><span style="opacity:.5"></span><span style="opacity:.75"></span><span></span> More</div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>5K pace</h2><span class="sub">min/km, lower is faster</span></div>
+      <div class="card-body"><div class="chart" id="c-pace" role="img" aria-label="Average pace on runs"></div></div>
+    </article>
+    <article class="card s4">
+      <div class="card-head"><h2>Recent workouts</h2></div>
+      <div class="table-wrap"><table class="wk"><thead><tr><th>Day</th><th>Workout</th><th class="num">Time</th><th class="num">Effort</th></tr></thead><tbody id="wk"></tbody></table></div>
+    </article>
+  </section>
+</main>
+
+<script src="../charts.js"></script>
+<script>
+// ---- deterministic sample data (synthetic) ----
+let seed=7; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const $=s=>document.querySelector(s), sum=a=>a.reduce((x,y)=>x+y,0), last=a=>a[a.length-1], prev=a=>a[a.length-2];
+const types=[['Run','var(--c1)'],['Ride','var(--c3)'],['Strength','var(--c2)'],['Yoga','var(--c4)']];
+const W=16, weeks=Array.from({length:W},(_,i)=>{const d=new Date(2026,9,26-7*(W-1-i));return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+const vol=types.map(([n],k)=>({name:n,color:types[k][1],values:weeks.map((_,i)=>{const base=[2.2,1.6,1.1,.5][k];return +(base*(0.65+rnd()*.7)*(1+i*.012)).toFixed(1)})}));
+const totals=weeks.map((_,i)=>+sum(vol.map(v=>v.values[i])).toFixed(1));
+const km=weeks.map((_,i)=>+(vol[0].values[i]*9.4+vol[1].values[i]*0).toFixed(1));
+const pace=weeks.map((_,i)=>+(5.75-i*0.028+(rnd()-.5)*.14).toFixed(2));
+const days=Array.from({length:7*17},()=>0).map((_,i)=>rnd()<.22?0:Math.round(25+rnd()*70));
+const heat=Array.from({length:7},(_,r)=>Array.from({length:17},(_,c)=>days[c*7+r]));
+const fmtH=h=>{const m=Math.round(h*60);return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m'};
+const pct=(a,b)=>(a-b)/b*100;
+function delta(cur,old,goodUp=true,u='%',abs=false){const p=abs?cur-old:pct(cur,old),up=p>=0,good=up===goodUp;
+  if(Math.abs(p)<0.05) return `<span class="delta" style="color:var(--text-2)">– 0${u}</span>`;
+  return `<span class="delta ${good?'pos':'neg'}">${up?'▲':'▼'} ${Math.abs(p).toFixed(1)}${u}</span>`}
+
+function render(n){
+  const sl=a=>a.slice(-n), X=sl(weeks);
+  $('#range-label').textContent=X[0]+' – '+last(X);
+  const wkH=last(totals), goalH=6;
+  $('#kpis').innerHTML=
+   `<article class="card hero"><div class="kpi hero"><span class="label">Active time this week</span>
+     <span class="value">${fmtH(wkH)}</span>
+     <div class="hero-goal"><div class="bar" role="progressbar" aria-valuenow="${Math.round(wkH/goalH*100)}" aria-valuemin="0" aria-valuemax="100"><span style="width:${Math.min(100,wkH/goalH*100)}%"></span></div>
+     <div class="meta"><span>${Math.round(wkH/goalH*100)}% of ${goalH}h goal</span><span>${delta(wkH,prev(totals))} vs last week</span></div></div></div></article>`+
+   kpi('Workouts','5',delta(5,4,true,'',true).replace('1.0','+1'),[3,4,4,5,3,4,5,4,5],'var(--c1)')+
+   kpi('Distance',last(km).toFixed(1)+' km',delta(last(km),prev(km)),sl(km),'var(--c1)')+
+   kpi('Resting HR','54 bpm',delta(54,56,false,' bpm',true),[58,57,57,56,56,55,56,55,54],'var(--c3)')+
+   kpi('Streak','12 days','<span class="chip">best 19</span>',[3,5,2,6,7,8,9,10,12],'var(--c2)');
+  function kpi(label,value,d,sp,color){return `<article class="card"><div class="kpi"><span class="label">${label}</span><div class="kpi-row"><span class="value">${value}</span><div class="chart spark" data-spark='${JSON.stringify(sp)}' data-color="${color}"></div></div><div class="foot">${d}</div></div></article>`}
+  document.querySelectorAll('[data-spark]').forEach(h=>Chart.spark(h,{values:JSON.parse(h.dataset.spark),color:h.dataset.color,area:true}));
+
+  $('#vol-legend').innerHTML=types.map(([n,c])=>`<span><i style="background:${c}"></i>${n}</span>`).join('');
+  Chart.bars($('#c-vol'),{x:X,series:vol.map(v=>({name:v.name,color:v.color,values:sl(v.values)})),stacked:true,fmt:v=>v+'h'});
+  Chart.line($('#c-pace'),{x:X,series:[{name:'Pace',values:sl(pace),color:'var(--c1)'}],zero:false,fmt:v=>Math.floor(v)+':'+String(Math.round((v%1)*60)).padStart(2,'0')});
+}
+document.querySelectorAll('#range button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#range button').forEach(x=>x.setAttribute('aria-pressed',x===b));render(+b.dataset.w)});
+render(12);
+
+const act=days.filter(Boolean).length;
+$('#heat-sub').textContent=act+' active days of '+days.length;
+Chart.heat($('#c-heat'),{values:heat,rowLabels:['M','','W','','F','','S'],colLabels:Array.from({length:17},(_,c)=>c%4===0?new Date(2026,9,26-7*(16-c)).toLocaleDateString('en-US',{month:'short',day:'numeric'}):''),fmt:v=>v?v+' min':'rest'});
+
+const goals=[['Run distance',142,160,'km','Needs 4.5 km/day to finish'],['Workouts',17,20,'sessions','On pace'],['Strength sessions',7,8,'sessions','1 more this week'],['Sleep ≥ 7h',22,31,'nights','Behind: 6 nights short']];
+$('#goals').innerHTML=goals.map(([n,c,t,u,note])=>{const p=c/t*100,ok=p>=85;return `<div class="goal"><div class="top"><b>${n}</b><span>${c} / ${t} ${u}</span></div><div class="bar" role="progressbar" aria-valuenow="${Math.round(p)}" aria-valuemin="0" aria-valuemax="100"><span class="${ok?'ok':p<60?'over':'warn'}" style="width:${p}%"></span></div><div class="note">${note}</div></div>`}).join('');
+
+const dot=c=>`<span class="type"><i style="background:${c}"></i>`;
+$('#wk').innerHTML=[['Today','Run',types[0][1],'Tempo 8 km','48:20','7/10'],['Sun','Ride',types[1][1],'Long ride','2:15:00','6/10'],['Fri','Strength',types[2][1],'Lower body','52:00','8/10'],['Thu','Run',types[0][1],'Intervals 6×800','41:10','9/10'],['Tue','Yoga',types[3][1],'Mobility flow','30:00','3/10'],['Mon','Run',types[0][1],'Easy 6 km','36:45','4/10']]
+ .map(r=>`<tr><td>${r[0]}</td><td>${dot(r[2])}${r[3]}</span></td><td class="num">${r[4]}</td><td class="num">${r[5]}</td></tr>`).join('');
+</script>
+</body>
+</html>
