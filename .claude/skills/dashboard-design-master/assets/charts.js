@@ -46,6 +46,7 @@
   const lmargin = (max, fmt) => Math.max(26, String(fmt(max)).length * 6.4 + 12);
 
   function line(host, o) {
+    if (o.area && o.zero === false) o = Object.assign({}, o, { area: false }); // shaded area implies a zero baseline (proportional ink)
     mount(host, (svg, W, H) => {
       const fmt = o.fmt || fmtDef, all = o.series.flatMap((s) => s.values);
       let lo = 0, n = nice(Math.max(...all), 4);

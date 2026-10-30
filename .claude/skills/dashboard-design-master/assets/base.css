@@ -5,7 +5,7 @@
   --text:#14181f; --text-2:#505a69; --text-3:#626c7a;
   --accent:#2f5bea; --accent-soft:rgba(47,91,234,.10);
   --pos:#107554; --neg:#b73636; --warn:#9e5e00;
-  --c1:#2f5bea; --c2:#e07a1f; --c3:#107554; --c4:#a23bb5; --c5:#b73636; --c6:#626c7a;
+  --c1:#2f5bea; --c2:#e07a1f; --c3:#107554; --c4:#a23bb5; --c5:#8b3a04; --c6:#626c7a; /* categorical: no red/green pair (they mean bad/good) */
   --border-ctl:#8791a0; /* >=3:1 on surface: boundaries that identify inputs and buttons (WCAG 1.4.11) */
   --grid:#e9ecf0; --shadow:0 1px 2px rgba(16,24,40,.05);
   --gap:12px; --pad:16px; --r:10px; --r-ctl:6px;
@@ -16,14 +16,14 @@
   --text:#e8ebf0; --text-2:#a4adbb; --text-3:#8691a3;
   --accent:#6f8dff; --accent-soft:rgba(111,141,255,.16);
   --pos:#3fbf94; --neg:#ef7373; --warn:#e0a040;
-  --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#c97bdc; --c5:#ef7373; --c6:#a4adbb;
+  --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#d9a6ec; --c5:#b8865a; --c6:#a4adbb;
   --border-ctl:#6b7482; --grid:#242a34; --shadow:none;}}
 :root[data-theme=dark]{
   --bg:#0f1217; --surface:#171b22; --surface-2:#1e232c; --border:#2a313c;
   --text:#e8ebf0; --text-2:#a4adbb; --text-3:#8691a3;
   --accent:#6f8dff; --accent-soft:rgba(111,141,255,.16);
   --pos:#3fbf94; --neg:#ef7373; --warn:#e0a040;
-  --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#c97bdc; --c5:#ef7373; --c6:#a4adbb;
+  --c1:#6f8dff; --c2:#f0a050; --c3:#3fbf94; --c4:#d9a6ec; --c5:#b8865a; --c6:#a4adbb;
   --border-ctl:#6b7482; --grid:#242a34; --shadow:none;}
 
 *{box-sizing:border-box}

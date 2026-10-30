@@ -32,7 +32,7 @@ node .claude/skills/dashboard-design-master/scripts/inspect.cjs .claude/skills/d
 - Analytics KPI hierarchy is subtle; a stronger primary emphasis would help.
 - `charts.js` has no legend-free heatmap scale and no keyboard focus on marks (tooltips are hover-only; accessible names are on hosts).
 - Inspector checks are heuristic: `dead-space-in-card` can false-positive on intentionally tall cards; contrast ignores gradients/images.
-- Dark mode was designed (tokens) but not screenshot-reviewed in these tests.
+- Dark mode: the fitness example was reviewed at 1440x900 (after the palette change) and looks consistent; finance and analytics were not reviewed in dark, nor was any example below 1440 wide.
 - Light touch/hover behaviour was only smoke-tested (filters, sort, reset) for analytics.
 
 ## Verification pass (2026-10-30)
@@ -52,3 +52,15 @@ After the first build, network access to nngroup.com, w3.org and perceptualedge.
 Few's paper independently supports three lessons the render loop found: colour with no meaning (#12), stretched sections to fill space (#13), and everything equally prominent (#10).
 
 **Still unverified:** Tufte, Ware, Munzner, Cleveland & McGill, Bertin, Sweller, Brewer, Wilke, Wathan & Schoger, Few's book, SC 1.4.10 and 2.5.5. They are books or pages not fetched; their claims are tagged [R].
+
+### Second round (Wilke, Okabe & Ito, Few's other writing, WCAG 1.4.10 / 2.5.5)
+
+| Finding | Evidence | Change |
+|---|---|---|
+| Palette had a red/green pair that is hard to tell apart for protanopes | simulated: worst pair ΔE 10.8 light, 13.7 dark | red slot replaced; worst pair now 17.7 / 16.9; categorical palette excludes red and green |
+| `Chart.line` could draw a shaded area on a non-zero baseline | Wilke, proportional ink | area fill refused when `zero:false` |
+| Pie guidance stricter than the source | Wilke ch. 10 | softened to "fine for simple fractions / tiny datasets" |
+| Colour-blindness figure wrongly demoted in round one | Okabe & Ito: 1 in 12 Caucasian males | restored with population qualifier |
+| 44px target presented without its level | SC 2.5.5 is AAA | labelled AAA |
+
+Remaining unverified: the books (Tufte, Ware, Munzner, Few's *Information Dashboard Design*, Bertin, Wathan & Schoger) and the Cleveland & McGill and Sweller papers; ColorBrewer's app page has no readable text, so its scales are verified only as described in Wilke.

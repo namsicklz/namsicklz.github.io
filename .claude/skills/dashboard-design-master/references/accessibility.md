@@ -11,7 +11,8 @@ Targets WCAG 2.2 AA where it affects dashboards. Items tagged [V] were checked a
 
 ## Colour
 - Colour must not be the only visual means of conveying information, indicating an action, or distinguishing an element (SC 1.4.1) [V]. Pair semantic colours with a sign, arrow, label, pattern or position ("▲ 12%", "Over budget by $40").
-- Few cites "the 10% of males and 1% of females who are color blind" [V, his figure]. Don't rely on red/green; check separability in lightness too. Chrome DevTools → Rendering → "Emulate vision deficiencies" previews it.
+- Prevalence of red-green colour blindness: "One in twelve Caucasian (8%), one in 20 Asian (5%), and one in 25 African (4%) males" (Okabe & Ito) [V]; Few cites 10% of males and 1% of females [V]. Don't rely on red/green; check separability in lightness too. Chrome DevTools → Rendering → "Emulate vision deficiencies" previews it.
+- **Palette check** [M]: the six categorical colours were simulated under deutan/protan/tritan (Machado 2009, CIE76 ΔE). Worst pair ΔE ≈ 17.7 light / 16.9 dark, comparable to Okabe-Ito's own set (about 16-21). The categorical palette deliberately excludes red and green, which carry bad/good meaning. ΔE ≈ 17 suffices for filled marks; for thin lines, small points or similar hues rely on direct labels or markers, not colour alone (Wilke ch. 19-20 [V]).
 - Separate point, from the same paper [V]: colour with no meaning is a cost. "Time is wasted as our brains ... search for the nonexistent meaning" of different colours on bars that are already labelled (Few, pitfall #12). One hue per meaning.
 
 ## Keyboard and focus [R/C]
@@ -23,7 +24,7 @@ Targets WCAG 2.2 AA where it affects dashboards. Items tagged [V] were checked a
 ## Target size (SC 2.5.8) [V]
 - Minimum **24 by 24 CSS px** for pointer targets, **or** an undersized target passes by the *spacing* exception: a 24px-diameter circle centred on its bounding box must not intersect another target, nor another undersized target's circle. (Two 20px buttons with a 4px gap pass; two touching 20px buttons fail.)
 - Other exceptions: an *equivalent* control that meets the size exists; *inline* targets in sentences or constrained by line-height; *user-agent* default controls you haven't resized; *essential* size/spacing, which the page says can include "an interactive data visualization where targets are necessarily dense" (still provide equivalent functionality, e.g. a table).
-- The 32px desktop / 40-44px touch figures are this skill's preference [H]; 44px is SC 2.5.5, AAA, not fetched [R].
+- The 32px desktop / 40-44px touch figures are this skill's preference [H]. 44 by 44 CSS px is SC 2.5.5 Target Size (Enhanced), Level **AAA** [V]: a good touch target, not the AA requirement.
 - `scripts/inspect.cjs` models the size and spacing rules; it does not model the other four exceptions.
 
 ## Charts for screen readers [R/C]
@@ -31,9 +32,9 @@ Targets WCAG 2.2 AA where it affects dashboards. Items tagged [V] were checked a
 - Provide the underlying data as a table (visually hidden or toggleable) for complex charts.
 - Don't rely on animation; honour `prefers-reduced-motion`.
 
-## Structure and zoom [R]
+## Structure and zoom [R, except reflow]
 - Semantic landmarks (`header`, `main`, `nav`), one `h1`, card titles as `h2`/`h3`.
-- Reflow at 320px width / 400% zoom without two-dimensional scrolling (SC 1.4.10, not fetched); tables may scroll inside their own container.
+- Reflow: content works at 320 CSS px wide (equivalent to a 1280px window at 400% zoom) without two-dimensional scrolling (SC 1.4.10 [V]). Data tables are an excepted two-dimensional layout, so a wide table may scroll inside its own container.
 - Text resizes to 200% without loss; avoid fixed heights on text containers.
 - Respect `prefers-color-scheme` and `prefers-reduced-motion`.
 
